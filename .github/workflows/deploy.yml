@@ -13,8 +13,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Check SSH key existence
-        run: ls -lah ~/.ssh
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/github-actions-key
+          chmod 600 ~/.ssh/github-actions-key
+          ls -lah ~/.ssh  # Check if key exists
 
       - name: Deploy to Server
         run: |
