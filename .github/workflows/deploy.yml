@@ -1,0 +1,24 @@
+name: CD - Deploy on Merge
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to Server
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/github-actions-key tonycypher@102.37.21.164 << 'EOF'
+            cd ~/hng12-backend-stage2-fastapi-book-project
+            git pull origin main
+            source venv/bin/activate
+            pip install -r requirements.txt
+            sudo systemctl restart fastapi
+          EOF
