@@ -11,15 +11,19 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/github-actions-key
+          chmod 600 ~/.ssh/github-actions-key
+          ssh-keyscan -H 102.37.21.164 >> ~/.ssh/known_hosts
+
       - name: Deploy to VM
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.VM_HOST }} # Replace with your VM IP
-          username: tonycypher
-          key: ${{ secrets.SSH_PRIVATE_KEY }} # Add your private key in GitHub Secrets
-          script: |
+        run: |
+          ssh -i ~/.ssh/github-actions-key tonycypher@102.37.21.164 << 'EOF'
             cd ~/hng12-backend-stage2-fastapi-book-project
             git pull origin main
             source venv/bin/activate
             pip install -r requirements.txt
             sudo systemctl restart fastapi
+          EOF
